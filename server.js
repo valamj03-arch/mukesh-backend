@@ -1,28 +1,44 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const mongoose = require("mongoose");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
-
-// Serve frontend
 app.use(express.static(path.join(__dirname)));
 
-// Contact API
-app.post("/contact", (req, res) => {
-  const { name, email, message } = req.body;
+// ✅ MongoDB Connection
+mongoose.connect("mongodb+srv://mukeshuser:ICsxX4dizIKqYon@cluster0.evhc7pc.mongodb.net/contactDB?retryWrites=true&w=majority")
+.then(() => console.log("MongoDB Connected"))
+.catch(err => console.log(err));
 
-  console.log("New Message:");
-  console.log("Name:", name);
-  console.log("Email:", email);
-  console.log("Message:", message);
-
-  res.json({ success: true });
+// ✅ Schema
+const ContactSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  message: String
 });
 
-// Root check
+const Contact = mongoose.model("Contact", ContactSchema);
+
+// ✅ Contact API
+app.post("/contact", async (req, res) => {
+  try {
+    const { name, email, message } = req.body;
+
+    const newMessage = new Contact({ name, email, message });
+    await newMessage.save();
+
+    res.json({ success: true });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false });
+  }
+});
+
+// Root
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
