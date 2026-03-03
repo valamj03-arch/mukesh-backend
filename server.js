@@ -38,7 +38,6 @@ app.post("/contact", async (req, res) => {
   }
 });
 
-// Root
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
